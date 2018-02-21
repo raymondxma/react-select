@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { findDOMNode } from 'react-dom';
+import { Manager, Popper, Target } from 'react-popper';
 
 import defaultArrowRenderer from './utils/defaultArrowRenderer';
 import defaultClearRenderer from './utils/defaultClearRenderer';
@@ -106,6 +107,7 @@ class Select extends React.Component {
 			isOpen: false,
 			isPseudoFocused: false,
 			required: false,
+			placement: 'bottom'
 		};
 	}
 
@@ -121,6 +123,7 @@ class Select extends React.Component {
 	}
 
 	componentDidMount () {
+		console.log('with popppppper');
 		if (typeof this.props.autofocus !== 'undefined' && typeof console !== 'undefined') {
 			console.warn('Warning: The autofocus prop has changed to autoFocus, support will be removed after react-select@1.0');
 		}
@@ -1094,6 +1097,17 @@ class Select extends React.Component {
 		return null;
 	}
 
+	updatePlacement () {
+		return {
+			enabled: true,
+			order: 890,
+			function: data => {
+				this.setState({ placement: data.placement });
+				return data;
+			}
+		};
+	}
+
 	renderOuter (options, valueArray, focusedOption) {
 		let menu = this.renderMenu(options, valueArray, focusedOption);
 		if (!menu) {
@@ -1101,7 +1115,12 @@ class Select extends React.Component {
 		}
 
 		return (
-			<div ref={ref => this.menuContainer = ref} className="Select-menu-outer" style={this.props.menuContainerStyle}>
+			<Popper
+				ref={ref => this.menuContainer = findDOMNode(ref)}
+				className="Select-menu-outer"
+				style={this.props.menuContainerStyle}
+				modifiers={{ updatePlacement: this.updatePlacement() }}
+			>
 				<div
 					className="Select-menu"
 					id={`${this._instancePrefix}-list`}
@@ -1114,7 +1133,7 @@ class Select extends React.Component {
 				>
 					{menu}
 				</div>
-			</div>
+			</Popper>
 		);
 	}
 
@@ -1160,12 +1179,18 @@ class Select extends React.Component {
 		}
 
 		return (
+			<Manager>
 			<div ref={ref => this.wrapper = ref}
 				 className={className}
 				 style={this.props.wrapperStyle}>
 				{this.renderHiddenField(valueArray)}
-				<div ref={ref => this.control = ref}
-					className="Select-control"
+				<Target ref={ref => this.control = ref}
+
+					className={classNames(
+										'Select-control',
+										{ 'Select-control--on-bottom': this.state.placement === 'bottom' },
+										{ 'Select-control--on-top': this.state.placement === 'top' }
+									)}
 					onKeyDown={this.handleKeyDown}
 					onMouseDown={this.handleMouseDown}
 					onTouchEnd={this.handleTouchEnd}
@@ -1181,9 +1206,10 @@ class Select extends React.Component {
 					{this.renderLoading()}
 					{this.renderClear()}
 					{this.renderArrow()}
-				</div>
+				</Target>
 				{isOpen ? this.renderOuter(options, valueArray, focusedOption) : null}
 			</div>
+			</Manager>
 		);
 	}
 }
