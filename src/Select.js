@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { findDOMNode } from 'react-dom';
+import { Manager, Popper, Target } from 'react-popper';
 
 import defaultArrowRenderer from './utils/defaultArrowRenderer';
 import defaultClearRenderer from './utils/defaultClearRenderer';
@@ -106,6 +107,7 @@ class Select extends React.Component {
 			isOpen: false,
 			isPseudoFocused: false,
 			required: false,
+			placement: 'bottom'
 		};
 	}
 
@@ -1094,6 +1096,17 @@ class Select extends React.Component {
 		return null;
 	}
 
+	updatePlacement () {
+		return {
+			enabled: true,
+			order: 890,
+			function: data => {
+				this.setState({ placement: data.placement });
+				return data;
+			}
+		};
+	}
+
 	renderOuter (options, valueArray, focusedOption) {
 		let menu = this.renderMenu(options, valueArray, focusedOption);
 		if (!menu) {
@@ -1101,7 +1114,12 @@ class Select extends React.Component {
 		}
 
 		return (
-			<div ref={ref => this.menuContainer = ref} className="Select-menu-outer" style={this.props.menuContainerStyle}>
+			<Popper
+				ref={ref => this.menuContainer = findDOMNode(ref)}
+				className="Select-menu-outer"
+				style={this.props.menuContainerStyle}
+				modifiers={{ updatePlacement: this.updatePlacement() }}
+			>
 				<div
 					className="Select-menu"
 					id={`${this._instancePrefix}-list`}
@@ -1114,7 +1132,7 @@ class Select extends React.Component {
 				>
 					{menu}
 				</div>
-			</div>
+			</Popper>
 		);
 	}
 
@@ -1160,11 +1178,12 @@ class Select extends React.Component {
 		}
 
 		return (
+			<Manager>
 			<div ref={ref => this.wrapper = ref}
 				 className={className}
 				 style={this.props.wrapperStyle}>
 				{this.renderHiddenField(valueArray)}
-				<div ref={ref => this.control = ref}
+				<Target ref={ref => this.control = ref}
 					className="Select-control"
 					onKeyDown={this.handleKeyDown}
 					onMouseDown={this.handleMouseDown}
@@ -1181,9 +1200,10 @@ class Select extends React.Component {
 					{this.renderLoading()}
 					{this.renderClear()}
 					{this.renderArrow()}
-				</div>
+				</Target>
 				{isOpen ? this.renderOuter(options, valueArray, focusedOption) : null}
 			</div>
+			</Manager>
 		);
 	}
 }
