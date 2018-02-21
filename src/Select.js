@@ -123,6 +123,7 @@ class Select extends React.Component {
 	}
 
 	componentDidMount () {
+		console.log('with popppppper');
 		if (typeof this.props.autofocus !== 'undefined' && typeof console !== 'undefined') {
 			console.warn('Warning: The autofocus prop has changed to autoFocus, support will be removed after react-select@1.0');
 		}
@@ -1184,7 +1185,12 @@ class Select extends React.Component {
 				 style={this.props.wrapperStyle}>
 				{this.renderHiddenField(valueArray)}
 				<Target ref={ref => this.control = ref}
-					className="Select-control"
+
+					className={classNames(
+										'Select-control',
+										{ 'Select-control--on-bottom': this.state.placement === 'bottom' },
+										{ 'Select-control--on-top': this.state.placement === 'top' }
+									)}
 					onKeyDown={this.handleKeyDown}
 					onMouseDown={this.handleMouseDown}
 					onTouchEnd={this.handleTouchEnd}
